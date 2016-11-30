@@ -1,6 +1,7 @@
 import numpy as np
 from matplotlib import pylab as plt
-from random import uniform
+from random import uniform, seed
+seed(12345)
 
 class LinearRegression():
 	def __init__(self,alpha,n):
@@ -60,4 +61,3 @@ def main():
 	plt.show()
 if __name__ == '__main__':
 	main()
-
