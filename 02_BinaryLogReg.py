@@ -1,52 +1,8 @@
+from ml_algo import BinaryLogisticRegression, circle_cluster
 import numpy as np
 from matplotlib import pylab as plt
-from random import uniform, triangular, seed
-from math import e, log, cos, sin, pi
+from random import seed
 seed(12345)
-
-class BinaryLogisticRegression():
-	def __init__(self,alpha,n):
-		self.theta = np.array([0 for i in range(n+1)])
-		self.alpha = alpha
-	def sigmoid(self,x):
-		return 1/(1+e**(-x))
-	def fit(self,X,y,iterations,tolerance):
-		leading_one = np.array([1 for i in X])
-		X = np.column_stack([leading_one,X])
-		self.cost_func_log = []
-		self.grad_func_log = []
-		for _ in range(iterations):
-			new_theta = np.array(self.theta)
-			grad = sum((i-j)**2 for i,j in zip(self.theta,new_theta))
-			new_theta = self.theta - self.alpha*self.J_func_deriv(X,y)
-			self.grad_func_log.append(grad)
-			self.theta = new_theta
-			self.cost_func_log.append(self.J_func(X,y))
-	def _predict(self,x):
-		return self.sigmoid(np.vdot(self.theta,x))
-	def predict(self,x):
-		x = np.array(x)
-		if len(x)==len(self.theta)-1:
-			x = np.concatenate([[1],x])
-			return self._predict(x)
-		elif len(x)==len(self.theta):
-			return self._predict(x)
-		else: 
-			raise Exception(x)
-	def cost_func(self,x,y):
-		value = self._predict(x)
-		value = 1e-12 if value==0 else 1-1e-12 if value==1 else value
-		return -log(value) if y==1 else -log(1-value)
-	def J_func(self,X,y):
-		return sum(self.cost_func(X[i],y[i]) for i in range(len(X)))/len(X)
-	def J_func_deriv(self,X,y):
-		return sum([(self._predict(X[i]) - y[i])*X[i] for i in range(len(X))])
-	def export_params(self):
-		return self.theta
-
-def circle_cluster(center_x,center_y,rad):
-	rad,angle = rad*(1-triangular(0,1,0)),uniform(0,2*pi)
-	return center_x+rad*cos(angle),center_y+rad*sin(angle)
 
 def main():
 
