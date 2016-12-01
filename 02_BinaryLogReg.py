@@ -51,8 +51,8 @@ def circle_cluster(center_x,center_y,rad):
 def main():
 
 	#init random cluster of dots
-	num_train = 200
-	num_test = 60
+	num_train = 400
+	num_test = 200
 	red_dots = np.array([circle_cluster(10,10,10) for i in range(num_train//2)])
 	blue_dots = np.array([circle_cluster(20,0,10) for i in range(num_train//2)])
 	Xtrain = np.concatenate((red_dots,blue_dots))
@@ -73,12 +73,13 @@ def main():
 		result = threshold(model.predict(Xtest[i]))
 		confmat[result][ytest[i]]+=1
 		confusion_dots[result][ytest[i]].append(Xtest[i])
+	print('Confusion matrix:')
 	print(confmat)
 	accuracy = (confmat[0][0]+confmat[1][1])/np.sum(confmat)
 	precision = confmat[0][0]/(confmat[0][0]+confmat[1][0])
 	recall = confmat[0][0]/(confmat[0][0]+confmat[0][1])
 	f1score = 2*precision*recall/(precision+recall)
-	print('Accuracy:\t{}\nPrecision:\t{}\nRecall:\t{}\nF1 score:\t{}'.format(accuracy,precision,recall,f1score))
+	print('\nAccuracy:\t{}\nPrecision:\t{}\nRecall:  \t{}\nF1 score:\t{}'.format(accuracy,precision,recall,f1score))
 
 	#plotting graph
 	f, plots = plt.subplots(2, 1)
@@ -86,7 +87,6 @@ def main():
 	plots[0].plot(*np.transpose(confusion_dots[1][0]),'rx')
 	plots[0].plot(*np.transpose(confusion_dots[0][1]),'bx')
 	plots[0].plot(*np.transpose(confusion_dots[1][1]),'b.')
-	plots[0].plot(*np.transpose(blue_dots),'b.')
 	plots[0].set_title('Classification task')
 	plots[1].plot(model.cost_func_log)
 	plots[1].set_title('Cost function')
