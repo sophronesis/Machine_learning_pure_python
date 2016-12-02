@@ -21,10 +21,14 @@ class LinearRegression():
 	def _predict(self,x):
 		return np.vdot(self.theta,x)
 	def predict(self,x):
-		x = np.array([x])
-		if x[0]!=1:
-			x = np.column_stack([[1],x])
+		x = (x,)
+		x = np.array(x)
+		if len(x) not in [len(self.theta)-1,len(self.theta)]:
+			raise Exception()			
+		if len(x)==len(self.theta)-1:
+			x = np.concatenate([[1],x])
 		return self._predict(x)
+
 	def cost_function(self,X,y):
 		return sum([(self._predict(X[i]) - y[i])**2 for i in range(len(X))])/(2*len(X))
 	def cost_function_deriv(self,X,y):
@@ -54,13 +58,11 @@ class BinaryLogisticRegression():
 		return self.sigmoid(np.vdot(self.theta,x))
 	def predict(self,x):
 		x = np.array(x)
+		if len(x) not in [len(self.theta)-1,len(self.theta)]:
+			raise Exception()			
 		if len(x)==len(self.theta)-1:
 			x = np.concatenate([[1],x])
-			return self._predict(x)
-		elif len(x)==len(self.theta):
-			return self._predict(x)
-		else: 
-			raise Exception(x)
+		return self._predict(x)
 	def cost_func(self,x,y):
 		value = self._predict(x)
 		value = 1e-12 if value==0 else 1-1e-12 if value==1 else value
@@ -102,8 +104,10 @@ class KMeansClustering():
 		return self.centroids
 
 class PCA():
-	def __init__(self,k):
+	def __init__(self,k,variance_retained=0.95):
+		"""if k=-1 pick k automaticaly"""
 		self.k = k
+		self.variance_retained = variance_retained
 	def fit(self,X):
 		X = np.array(X)
 		#normalization
@@ -114,12 +118,22 @@ class PCA():
 				X[j][i] = (X[j][i] - mean[i])/sigma[i]
 		#computing sigma and U
 		sigma = np.dot(np.transpose(X),X)/len(X)
-		U,*res = np.linalg.svd(sigma)
-		#print(U.shape)
+		U,S,V = np.linalg.svd(sigma)
+		if self.k==-1:#auto pick k value
+			total = np.trace(S)
+			summ = 0
+			for i in range(len(S)):
+				summ+=S[i][i]
+				if summ/total >= self.variance_retained:
+					self.k = i+1
+					break
 		self.Ureduced = np.transpose(U[:,:self.k])
 	def predict(self,x):
 		x = np.transpose(np.array(x))
 		return np.dot(self.Ureduced,x)
+	def predict_many(self,X):
+		X = np.transpose(np.array(X))
+		return np.transpose(np.dot(self.Ureduced,X))
 	def export_model():
 		return self.Ureduced
 
