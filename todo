@@ -1,9 +1,68 @@
-iris + k-means + PCA
-Gaussian distrib classifier
-FF neural networks
-ICA
-SVM
-Naive bayes
+
+
+
+
+[++++] - 01 - Градиентный спуск (Применен в 02,03,09,11):
+	Done:
+		Добавить метод импульса (momentum method)
+	Ссылки:
+		https://www.coursera.org/learn/machine-learning/lecture/Z9DKX/gradient-descent-for-multiple-variables
+		https://youtu.be/5u0jaA3qAGk
+[++++] - 02 - Линейная регрессия:
+	Done:
+		Нормализация данных происходит через через PCA
+	Ссылки:
+		https://www.coursera.org/learn/machine-learning/lecture/db3jS/model-representation
+	TODO: 
+[++++] - 03 - Логистическая регрессия
+	Done:
+		Нормализация данных происходит через через PCA
+	Ссылки:
+		https://www.coursera.org/learn/machine-learning/lecture/wlPeP/classification
+	TODO: 
+[----] - 04 - Метод максимального правдоподобия
+	Ссылки:
+		https://www.youtube.com/watch?v=RPtYRm2tboA
+[----] - 05 - Обобщенные линейные модели
+	??? просто добавить в исходные данные новых фич и запустить линейную регрессию?
+[----] - 06 - Наивный баесовский классификатор
+	#set(set() for i in classes)
+	Ссылки:
+		https://alexn.org/blog/2012/02/09/howto-build-naive-bayes-classifier.html
+		https://github.com/muatik/naive-bayes-classifier/blob/master/examples/newsClassifier.py
+		http://machinelearningmastery.com/naive-bayes-classifier-scratch-python/
+		https://alexn.org/blog/2012/02/09/howto-build-naive-bayes-classifier.html
+[----] - 07 - Гаусовый дискриминантный анализ
+	Ссылки:
+		https://cosmolearning.org/video-lectures/learning-algorithms-generative-gaussian-discriminant-analysis-digression/
+		http://stats.stackexchange.com/questions/80507/what-is-a-gaussian-discriminant-analysis-gda
+[++++] - 08 - Регуляризация (Применена в 02,03)
+	Ссылки:
+		https://www.coursera.org/learn/machine-learning/lecture/QrMXd/regularized-linear-regression
+[----] - 09 - Метод опорных векторов
+	Ссылки:
+		https://gist.github.com/mblondel/586753
+		http://tullo.ch/articles/svm-py/
+[++++] - 10 - Метод к-средних
+	Ссылки:
+		https://www.coursera.org/learn/machine-learning/lecture/93VPG/k-means-algorithm
+[----] - 11 - Нейросеть прямого распостранения
+	Ссылки:
+		https://www.coursera.org/learn/neural-networks/
+		https://www.youtube.com/playlist?list=PLiaHhY2iBX9hdHaRr6b7XevZtgZRa1PoU (Писал свою первую нейросеть адаптируя код на питоне на С++)
+		https://www.coursera.org/learn/machine-learning/home/week/4
+[++++] - 12 - Метод главных компонент (PCA)
+	Ссылки:
+		https://www.coursera.org/learn/machine-learning/lecture/GBFTt/principal-component-analysis-problem-formulation
+[----] - 13 - Метод независимых компонент (ICA)
+	Ссылки:
+		https://www.cs.helsinki.fi/u/ahyvarin/papers/NN00new.pdf
+		http://ethesis.nitrkl.ac.in/1431/1/Sasmita_Behera.pdf
+		http://scikit-learn.org/stable/auto_examples/decomposition/plot_ica_blind_source_separation.html#sphx-glr-auto-examples-decomposition-plot-ica-blind-source-separation-py
+		http://courses.graphicon.ru/files/courses/smisa/2009/lectures/lecture12.pdf
+
+
+
 
 
 

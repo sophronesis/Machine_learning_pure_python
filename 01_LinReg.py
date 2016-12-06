@@ -13,8 +13,10 @@ def main():
 	y = np.array([linear_func_with_noise(i,k,b,randrange) for i in X])
 
 	#using linear regression
-	model = LinearRegression(0.05,1)
+	model = LinearRegression(0.05,1,momentum=0.7)
 	model.fit(X,y,100,1e-5)
+	model2 = LinearRegression(0.05,1,momentum=0)
+	model2.fit(X,y,100,1e-5)
 
 	#output results
 	print (' Expected: k={:<7} b={:<7}'.format(float(k),float(b)))
@@ -28,7 +30,8 @@ def main():
 	plots[0].set_title('Random data fitting')
 
 	plots[1].plot(model.cost_func_log)
-	plots[1].set_title('Cost function')
+	plots[1].plot(model2.cost_func_log)
+	plots[1].set_title('Cost function (blue curve - with momentum grad)')
 	plt.show()
 if __name__ == '__main__':
 	main()

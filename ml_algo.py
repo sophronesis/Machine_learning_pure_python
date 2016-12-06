@@ -3,61 +3,82 @@ from random import uniform, triangular, seed, shuffle
 from math import e, log, cos, sin, pi
 
 class LinearRegression():
-	def __init__(self,alpha,n):
+	def __init__(self,alpha,n,normalize=True,Lambda=0.01,momentum=0.5):
 		self.theta = np.array([0 for i in range(n+1)])
 		self.alpha = alpha
+		self.normalize = normalize
+		self.Lambda = Lambda
+		self.momentum = momentum
 	def fit(self,X,y,iterations,tolerance):
+		if self.normalize:
+			self.pca = PCA(len(X[0]))
+			self.pca.fit(X)
+			X = self.pca.predict_many(X)
 		leading_one = np.array([1 for i in X])
 		X = np.column_stack([leading_one,X])
 		self.cost_func_log = []
 		self.grad_func_log = []
+		prev_grad = np.array([0. for i in X[0]])
 		for _ in range(iterations):
 			new_theta = np.array(self.theta)
-			grad = sum((i-j)**2 for i,j in zip(self.theta,new_theta))
-			new_theta = self.theta - self.alpha*self.cost_function_deriv(X,y)
+			grad = self.alpha*self.cost_function_deriv(X,y,new_theta) + self.momentum*prev_grad
+			new_theta = new_theta - grad
+			prev_grad = grad
 			self.grad_func_log.append(grad)
 			self.theta = new_theta
-			self.cost_func_log.append(self.cost_function(X,y))
-	def _predict(self,x):
-		return np.vdot(self.theta,x)
+			self.cost_func_log.append(self.cost_function(X,y,self.theta))
+	def _predict(self,x,theta):
+		return np.vdot(theta,x)
 	def predict(self,x):
 		x = (x,)
 		x = np.array(x)
+		if self.normalize:
+			x = self.pca.predict(x)
 		if len(x) not in [len(self.theta)-1,len(self.theta)]:
 			raise Exception()			
 		if len(x)==len(self.theta)-1:
 			x = np.concatenate([[1],x])
-		return self._predict(x)
-
-	def cost_function(self,X,y):
-		return sum([(self._predict(X[i]) - y[i])**2 for i in range(len(X))])/(2*len(X))
-	def cost_function_deriv(self,X,y):
-		return sum([(self._predict(X[i]) - y[i])*X[i] for i in range(len(X))])/len(X)
+		return self._predict(x,self.theta)
+	def cost_function(self,X,y,theta):
+		return (sum([(self._predict(X[i],theta) - y[i])**2 for i in range(len(X))])+self.Lambda*np.vdot(theta,theta))/(2*len(X))
+	def cost_function_deriv(self,X,y,theta):
+		return (sum([(self._predict(X[i],theta) - y[i])*X[i] for i in range(len(X))]) + self.Lambda*theta)/len(X)
 	def export_model(self):
 		return self.theta
 
 class BinaryLogisticRegression():
-	def __init__(self,alpha,n):
+	def __init__(self,alpha,n,normalize=True,Lambda=0.01,momentum=0.5):
 		self.theta = np.array([0 for i in range(n+1)])
 		self.alpha = alpha
+		self.normalize = normalize
+		self.Lambda = Lambda
+		self.momentum = momentum
 	def sigmoid(self,x):
 		return 1/(1+e**(-x))
 	def fit(self,X,y,iterations,tolerance):
+		if self.normalize:
+			self.pca = PCA(len(X[0]))
+			self.pca.fit(X)
+			X = self.pca.predict_many(X)
 		leading_one = np.array([1 for i in X])
 		X = np.column_stack([leading_one,X])
 		self.cost_func_log = []
 		self.grad_func_log = []
+		prev_grad = np.array([0. for i in X[0]])
 		for _ in range(iterations):
 			new_theta = np.array(self.theta)
-			grad = sum((i-j)**2 for i,j in zip(self.theta,new_theta))
-			new_theta = self.theta - self.alpha*self.J_func_deriv(X,y)
+			grad = self.alpha*self.J_func_deriv(X,y,new_theta) + self.momentum*prev_grad
+			new_theta = new_theta - grad
+			prev_grad = grad
 			self.grad_func_log.append(grad)
 			self.theta = new_theta
-			self.cost_func_log.append(self.J_func(X,y))
+			self.cost_func_log.append(self.J_func(X,y,self.theta))
 	def _predict(self,x):
 		return self.sigmoid(np.vdot(self.theta,x))
 	def predict(self,x):
 		x = np.array(x)
+		if self.normalize:
+			x = self.pca.predict(x)
 		if len(x) not in [len(self.theta)-1,len(self.theta)]:
 			raise Exception()			
 		if len(x)==len(self.theta)-1:
@@ -67,10 +88,10 @@ class BinaryLogisticRegression():
 		value = self._predict(x)
 		value = 1e-12 if value==0 else 1-1e-12 if value==1 else value
 		return -log(value) if y==1 else -log(1-value)
-	def J_func(self,X,y):
-		return sum(self.cost_func(X[i],y[i]) for i in range(len(X)))/len(X)
-	def J_func_deriv(self,X,y):
-		return sum([(self._predict(X[i]) - y[i])*X[i] for i in range(len(X))])
+	def J_func(self,X,y,theta):
+		return (sum(self.cost_func(X[i],y[i]) for i in range(len(X))) + self.Lambda*np.vdot(theta,theta))/len(X)
+	def J_func_deriv(self,X,y,theta):
+		return (sum([(self._predict(X[i]) - y[i])*X[i] for i in range(len(X))]) + self.Lambda*theta)/len(X)
 	def export_model(self):
 		return self.theta
 
@@ -104,7 +125,7 @@ class KMeansClustering():
 		return self.centroids
 
 class PCA():
-	def __init__(self,k,variance_retained=0.95):
+	def __init__(self,k=-1,variance_retained=0.95):
 		"""if k=-1 pick k automaticaly"""
 		self.k = k
 		self.variance_retained = variance_retained

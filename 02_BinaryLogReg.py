@@ -20,8 +20,10 @@ def main():
 	ytest = np.array([0 for _ in range(num_test//2)]+[1 for _ in range(num_test//2)])
 	
 	#use logistic regression, calculating on test data and output metrics
-	model = BinaryLogisticRegression(0.0001,2)
+	model = BinaryLogisticRegression(0.03,2)
 	model.fit(Xtrain,ytrain,100,1e-5)
+	model2 = BinaryLogisticRegression(0.03,2,momentum=0)
+	model2.fit(Xtrain,ytrain,100,1e-5)
 	threshold = lambda x: 0 if x<0.5 else 1
 	confmat = np.zeros((2,2))
 	confusion_dots = [[[],[]],[[],[]]]
@@ -39,13 +41,14 @@ def main():
 
 	#plotting graph
 	f, plots = plt.subplots(2, 1)
-	plots[0].plot(*np.transpose(confusion_dots[0][0]),'r.')
-	plots[0].plot(*np.transpose(confusion_dots[1][0]),'rx')
-	plots[0].plot(*np.transpose(confusion_dots[0][1]),'bx')
-	plots[0].plot(*np.transpose(confusion_dots[1][1]),'b.')
+	plots[0].plot(*np.array(confusion_dots[0][0]).T,'r.')
+	plots[0].plot(*np.array(confusion_dots[1][0]).T,'rx')
+	plots[0].plot(*np.array(confusion_dots[0][1]).T,'bx')
+	plots[0].plot(*np.array(confusion_dots[1][1]).T,'b.')
 	plots[0].set_title('Classification task')
 	plots[1].plot(model.cost_func_log)
-	plots[1].set_title('Cost function')
+	plots[1].plot(model2.cost_func_log)
+	plots[1].set_title('Cost function (blue curve - with momentum grad)')
 	plt.show()
 
 if __name__ == '__main__':
