@@ -1,6 +1,7 @@
 import numpy as np
 from random import uniform, triangular, seed, shuffle
 from math import e, log, cos, sin, pi
+from functools import partial
 
 class LinearRegression():
 	def __init__(self,alpha,n,normalize=True,Lambda=0.01,momentum=0.5):
@@ -92,6 +93,82 @@ class BinaryLogisticRegression():
 		return (sum(self.cost_func(X[i],y[i]) for i in range(len(X))) + self.Lambda*np.vdot(theta,theta))/len(X)
 	def J_func_deriv(self,X,y,theta):
 		return (sum([(self._predict(X[i]) - y[i])*X[i] for i in range(len(X))]) + self.Lambda*theta)/len(X)
+	def export_model(self):
+		return self.theta
+
+class Kernel():
+	@staticmethod
+	def linear():
+		return lambda x,y: 1 if x is y else np.dot(x, y)
+
+	@staticmethod
+	def gaussian(sigma):
+		return lambda x,y: 1 if x is y else np.exp(-np.sqrt(np.linalg.norm(x-y) ** 2 / (2 * sigma ** 2)))
+
+class BinarySVM():
+	def __init__(self,kernel=Kernel.linear(),C=10,alpha=0.01,normalize=True,momentum=0.5):
+		self.C = C
+		self.kernel = kernel
+		self.normalize = normalize
+		self.momentum = momentum
+		self.alpha = alpha
+	def fit(self,X,y,iterations):
+		self.theta = np.zeros((len(X)+1))
+		if self.normalize:
+			self.pca = PCA(len(X[0]))
+			self.pca.fit(X)
+			X = self.pca.predict_many(X)
+		self.X = X
+		self.cost_func_log = []
+		self.grad_func_log = []
+		prev_grad = np.array([0. for i in range(len(X)+1)])
+		for _ in range(iterations):
+			new_theta = np.array(self.theta)
+			grad = self.alpha*self.J_func_deriv_numerical(X,y,new_theta) + self.momentum*prev_grad
+			new_theta = new_theta - grad
+			prev_grad = grad
+			print("grad=",grad)
+			self.grad_func_log.append(grad)
+			self.theta = new_theta
+			self.cost_func_log.append(self.J_func(X,y,self.theta))
+	def kernel_features(self,x):
+		return np.array([1]+[self.kernel(x,self.X[i]) for i in range(len(self.X))])
+	def _predict(self,x,theta):
+		return np.vdot(theta,self.kernel_features(x))
+	def predict(self,x):
+		x = (x,)
+		x = np.array(x)
+		if self.normalize:
+			x = self.pca.predict(x).T
+		return self._predict(x,self.theta)
+	def cost_func(self,x,theta,val_sign):
+		y = self._predict(x,theta)
+		if val_sign==1:
+			return 0 if y>1 else 1-y
+		else:
+			return 0 if y<-1 else y+1
+	def cost_func_deriv(self,x,theta,val_sign):
+		y = self._predict(x,theta)
+		if val_sign==1:
+			return np.array([0 if y>1 else -theta[i] for i in range(len(theta))]) 
+		else:
+			return np.array([0 if y<-1 else theta[i] for i in range(len(theta))])
+	def J_func(self,X,y,theta):
+		return self.C*sum(self.cost_func(X[i],theta,y[i]) for i in range(len(X))) + np.vdot(theta,theta)
+	def J_func_deriv_numerical(self,X,y,theta,epsilon=1e-10):
+		new_theta = np.copy(theta)
+		current_cost = self.J_func(X,y,theta)
+		J_func_der = np.zeros(theta.shape)
+		for i in range(len(new_theta)):
+			new_theta[i] = theta[i] + epsilon
+			cost_plus = self.J_func(X,y,new_theta)
+			new_theta[i] = theta[i] - epsilon
+			cost_minus = self.J_func(X,y,new_theta)
+			J_func_der[i] = (cost_plus - cost_minus)/(2*epsilon)
+		return J_func_der
+	def J_func_deriv(self,X,y,theta):
+		print()
+		return sum([(self._predict(X[i],theta) - y[i])*self.cost_func_deriv(X[i],theta,y[i]) for i in range(len(X))]) + theta
 	def export_model(self):
 		return self.theta
 
