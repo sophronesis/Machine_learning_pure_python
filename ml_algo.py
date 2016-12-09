@@ -2,6 +2,7 @@ import numpy as np
 from random import uniform, triangular, seed, shuffle
 from math import e, log, cos, sin, pi
 from functools import partial
+import re
 
 class LinearRegression():
 	def __init__(self,alpha,n,normalize=True,Lambda=0.01,momentum=0.5):
@@ -126,8 +127,11 @@ class BinarySVM():
 			new_theta = np.array(self.theta)
 			grad = self.alpha*self.J_func_deriv_numerical(X,y,new_theta) + self.momentum*prev_grad
 			new_theta = new_theta - grad
+			print('theta=',self.theta)
+
+			print('Grad  num=',self.J_func_deriv_numerical(X,y,new_theta))
+			#print('Grad calc=',self.J_func_deriv(X,y,new_theta))
 			prev_grad = grad
-			print("grad=",grad)
 			self.grad_func_log.append(grad)
 			self.theta = new_theta
 			self.cost_func_log.append(self.J_func(X,y,self.theta))
@@ -141,6 +145,10 @@ class BinarySVM():
 		if self.normalize:
 			x = self.pca.predict(x).T
 		return self._predict(x,self.theta)
+	def predict_many(self,X):
+		if self.normalize:
+			X = self.pca.predict_many(X).T
+		return np.array([self._predict(x,self.theta) for x in X])
 	def cost_func(self,x,theta,val_sign):
 		y = self._predict(x,theta)
 		if val_sign==1:
@@ -149,10 +157,11 @@ class BinarySVM():
 			return 0 if y<-1 else y+1
 	def cost_func_deriv(self,x,theta,val_sign):
 		y = self._predict(x,theta)
+		x = self.kernel_features(x)
 		if val_sign==1:
-			return np.array([0 if y>1 else -theta[i] for i in range(len(theta))]) 
+			return np.array([0 if y>1 else -x[i] for i in range(len(x))]) 
 		else:
-			return np.array([0 if y<-1 else theta[i] for i in range(len(theta))])
+			return np.array([0 if y<-1 else x[i] for i in range(len(x))])
 	def J_func(self,X,y,theta):
 		return self.C*sum(self.cost_func(X[i],theta,y[i]) for i in range(len(X))) + np.vdot(theta,theta)
 	def J_func_deriv_numerical(self,X,y,theta,epsilon=1e-10):
@@ -234,6 +243,59 @@ class PCA():
 		return np.transpose(np.dot(self.Ureduced,X))
 	def export_model():
 		return self.Ureduced
+
+class NaiveBayesClassifier():
+	def __init__(self,min_prob=1e-5,punctuation=["#$.,:?!"]):
+		self.classnamecount = {}
+		self.data = {}
+		self.punctuation = punctuation
+		self.min_prob = 1e-5
+	def _addClass(self,classname):
+		if not classname in self.classnamecount:
+			self.classnamecount[classname] = 0
+		self.classnamecount[classname]+=1
+	def _addToken(self,token,classname):
+		if not token in self.data:
+			self.data[token] = {}
+		if not classname in self.data[token]:
+			self.data[token][classname] = 0
+		self.data[token][classname] +=1
+	def _getTotalCount(self):
+		return sum(self.classnamecount[i] for i in self.classnamecount)
+	def _tokenize(self,string):
+		string = re.sub(str(self.punctuation),"",string)	
+		tokens = string.lower().split()
+		return tokens
+	def _getTokenProb(self,token,classname):
+		if not token in self.data:
+			return None
+		if classname in self.classnamecount and classname in self.data[token]:#return probability if presented
+			return self.data[token][classname]/self.classnamecount[classname] 
+		return self.min_prob
+	def train(self,string,classname):
+		self._addClass(classname)
+		tokens = self._tokenize(string)
+		for token in tokens:
+			self._addToken(token,classname)
+	def predict_prob(self,string):
+		from functools import reduce
+		tokens = list(set(self._tokenize(string)))
+		probPerClass = {}
+		for classname in self.classnamecount:
+			probPerToken = [self._getTokenProb(token, classname) for token in tokens]
+			probPerClass[classname] = reduce(lambda a,b: a*b, [i for i in probPerToken if i]) 
+		if len(probPerClass)>0:
+			summ = sum(probPerClass.values())
+			for item in probPerClass:
+				probPerClass[item] /= summ
+			return probPerClass
+		else: 
+			return "Not enough data" 
+		return probPerClass 
+	def predict_class(self,string):
+		probPerClass = self.predict_prob(string)
+		maxx = None if not probPerClass else max(probPerClass.keys(), key=lambda key:probPerClass[key])
+		return [maxx,probPerClass[maxx]] if maxx else ["Couldn't classify",0]
 
 def circle_cluster(center_x,center_y,rad):
 	"""Create sample from shape of a circle in coords (center_x,center_y) and with rad radius"""
