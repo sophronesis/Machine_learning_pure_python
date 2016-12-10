@@ -297,6 +297,41 @@ class NaiveBayesClassifier():
 		maxx = None if not probPerClass else max(probPerClass.keys(), key=lambda key:probPerClass[key])
 		return [maxx,probPerClass[maxx]] if maxx else ["Couldn't classify",0]
 
+class ICA():
+	def __init__(self,tolerance=1e-5,max_iteration=20):
+		self.tolerance = tolerance
+		self.max_iteration= max_iteration
+	def recover_sources(self,X,w_init=None):
+		np.copy(X)
+		m,n = len(X),len(X[0])
+		#center data
+		X = (X - X.mean(axis=0)).T
+		#whiten data 
+		u, d, _ = np.linalg.svd(X, full_matrices=False)
+		K = (u / d).T
+		X = np.dot(K, X)
+		X *= np.sqrt(X.shape[1])
+
+		W = np.zeros((n,n))
+		for j in range(n):
+			w = np.random.normal(size=(4,))
+			w /= np.sqrt((w ** 2).sum())
+			for i in range(self.max_iteration):
+				x = np.dot(w.T, X)
+				f  = np.exp(-(x ** 2) / 2)
+				g  = x * f
+				dg = ((1 - x ** 2) * f).mean(axis=-1)
+				w1 = (X * g).mean(axis=1) - dg.mean() * w
+				w1 -= np.dot(np.dot(w1, W[:j].T), W[:j])
+				w1 /= np.sqrt((w1 ** 2).sum())
+				lim = np.abs(np.abs((w1 * w).sum()) - 1)
+				w = w1
+				if lim < self.tolerance:
+					break
+			W[j, :] = w
+		S = np.dot(W, X).T
+		return S
+
 def circle_cluster(center_x,center_y,rad):
 	"""Create sample from shape of a circle in coords (center_x,center_y) and with rad radius"""
 	rad,angle = rad*(1-triangular(0,1,0)),uniform(0,2*pi)

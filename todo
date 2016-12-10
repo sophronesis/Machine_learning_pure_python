@@ -1,8 +1,8 @@
-ICA
 Нейросеть
 SVM
 GDA
-NBC
+Обобщ лин модели
+
 
 tolerance
 
@@ -29,13 +29,11 @@ tolerance
 		https://www.youtube.com/watch?v=RPtYRm2tboA
 [----] - 05 - Обобщенные линейные модели
 	??? просто добавить в исходные данные новых фич и запустить линейную регрессию?
-[----] - 06 - Наивный баесовский классификатор
+[++++] - 06 - Наивный баесовский классификатор
 	#set(set() for i in classes)
 	Ссылки:
 		https://alexn.org/blog/2012/02/09/howto-build-naive-bayes-classifier.html
 		http://nlp.stanford.edu/IR-book/html/htmledition/naive-bayes-text-classification-1.html
-		http://machinelearningmastery.com/naive-bayes-classifier-scratch-python/
-		https://alexn.org/blog/2012/02/09/howto-build-naive-bayes-classifier.html
 [----] - 07 - Гаусовый дискриминантный анализ
 	Ссылки:
 		https://cosmolearning.org/video-lectures/learning-algorithms-generative-gaussian-discriminant-analysis-digression/
@@ -60,12 +58,13 @@ tolerance
 [++++] - 12 - Метод главных компонент (PCA)
 	Ссылки:
 		https://www.coursera.org/learn/machine-learning/lecture/GBFTt/principal-component-analysis-problem-formulation
-[----] - 13 - Метод независимых компонент (ICA)
+[++++] - 13 - Метод независимых компонент (ICA)
 	Ссылки:
 		https://www.cs.helsinki.fi/u/ahyvarin/papers/NN00new.pdf
 		http://ethesis.nitrkl.ac.in/1431/1/Sasmita_Behera.pdf
 		http://scikit-learn.org/stable/auto_examples/decomposition/plot_ica_blind_source_separation.html#sphx-glr-auto-examples-decomposition-plot-ica-blind-source-separation-py
 		http://courses.graphicon.ru/files/courses/smisa/2009/lectures/lecture12.pdf
+		https://www.cs.helsinki.fi/u/ahyvarin/papers/TNN99new.pdf
 
 
 
