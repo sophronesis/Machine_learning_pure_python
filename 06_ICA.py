@@ -5,6 +5,7 @@ from ml_algo import ICA
 #seed(0)
 
 def main():
+	#data preparing
 	n_samples = 8000
 	time = np.linspace(0, 8, n_samples)
 	s1 = np.sin(time - 1.5)
@@ -13,11 +14,10 @@ def main():
 	s4 = np.arcsin(np.sin(20 * time + 3.85))
 	S = np.c_[s1, s2, s3, s4]
 	S += 0.05 * np.random.normal(size=S.shape)
-
 	S /= S.std(axis=0)
-	A = np.array([[1, 1, 1, 0.7], [0.5, 2, 1.0, 1.3], [1.5, 1.0, 2.0, 0.4], [1.8, 1.7, 0.4, 0.6] ])  # Mixing matrix
+	A = np.array([[1, 1, 1, 0.7], [0.5, 2, 1.0, 1.3], [1.5, 1.0, 2.0, 0.4], [1.8, 1.7, 0.4, 0.6] ])
 	X = np.dot(S, A.T)
-
+	#unmixing with ICA
 	model = ICA(tolerance=1e-5)
 	Shat = model.recover_sources(X)
 	Shat /= Shat.std(axis=0)

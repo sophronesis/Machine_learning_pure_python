@@ -13,9 +13,10 @@ def main():
 	]
 	testset = [
 	"Syria got new weapons",
-	"Tax laws enforced in California",
+	"Tax laws enforced in California soon",
 	"Information about recent graphene extraction method"
 	]
+	print('Naive bayes text classification:')
 	newsmodel = NaiveBayesClassifier()
 	for text,classname in trainset:
 		newsmodel.train(text,classname)

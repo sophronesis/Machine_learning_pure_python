@@ -98,15 +98,7 @@ class BinaryLogisticRegression():
 			self.theta = new_theta
 			self.cost_func_log.append(self.J_func(X,y,self.theta))
 	def _predict(self,x):
-		try:
-			return self.sigmoid(np.vdot(self.theta,x))
-		except Exception:
-			print(x,self.theta)
-			raise
-		else:
-			pass
-		finally:
-			pass
+		return self.sigmoid(np.vdot(self.theta,x))
 		
 	def predict(self,x):
 		x = np.array(x)
@@ -128,53 +120,42 @@ class BinaryLogisticRegression():
 	def export_model(self):
 		return self.theta
 
-class Kernel():
-	@staticmethod
-	def linear():
-		return lambda x,y: 1 if x is y else np.dot(x, y)
-
-	@staticmethod
-	def gaussian(sigma):
-		return lambda x,y: 1 if x is y else np.exp(-np.sqrt(np.linalg.norm(x-y) ** 2 / (2 * sigma ** 2)))
-
 class BinarySVM():
-	def __init__(self,kernel=Kernel.linear(),C=10,alpha=0.01,normalize=True,momentum=0.5):
+	def __init__(self,C=10,alpha=0.01,normalize=True,momentum=0.5):
 		self.C = C
-		self.kernel = kernel
 		self.normalize = normalize
 		self.momentum = momentum
 		self.alpha = alpha
 	def fit(self,X,y,iterations):
-		self.theta = np.zeros((len(X)+1))
+		self.theta = np.zeros((len(X[0])+1))
 		if self.normalize:
 			self.pca = PCA(len(X[0]))
 			self.pca.fit(X)
 			X = self.pca.predict_many(X)
+		leading_one = np.array([1 for i in X])
+		X = np.column_stack([leading_one,X])
 		self.X = X
 		self.cost_func_log = []
 		self.grad_func_log = []
-		prev_grad = np.array([0. for i in range(len(X)+1)])
+		prev_grad = np.array([0. for i in range(len(X[0]))])
 		for _ in range(iterations):
 			new_theta = np.array(self.theta)
 			grad = self.alpha*self.J_func_deriv_numerical(X,y,new_theta) + self.momentum*prev_grad
 			new_theta = new_theta - grad
-			print('theta=',self.theta)
-
-			print('Grad  num=',self.J_func_deriv_numerical(X,y,new_theta))
-			#print('Grad calc=',self.J_func_deriv(X,y,new_theta))
 			prev_grad = grad
 			self.grad_func_log.append(grad)
 			self.theta = new_theta
 			self.cost_func_log.append(self.J_func(X,y,self.theta))
-	def kernel_features(self,x):
-		return np.array([1]+[self.kernel(x,self.X[i]) for i in range(len(self.X))])
 	def _predict(self,x,theta):
-		return np.vdot(theta,self.kernel_features(x))
+		return np.vdot(theta,x)
 	def predict(self,x):
-		x = (x,)
 		x = np.array(x)
 		if self.normalize:
-			x = self.pca.predict(x).T
+			x = self.pca.predict(x)
+		if len(x) not in [len(self.theta)-1,len(self.theta)]:
+			raise Exception()			
+		if len(x)==len(self.theta)-1:
+			x = np.concatenate([[1],x])
 		return self._predict(x,self.theta)
 	def predict_many(self,X):
 		if self.normalize:
@@ -188,13 +169,12 @@ class BinarySVM():
 			return 0 if y<-1 else y+1
 	def cost_func_deriv(self,x,theta,val_sign):
 		y = self._predict(x,theta)
-		x = self.kernel_features(x)
 		if val_sign==1:
 			return np.array([0 if y>1 else -x[i] for i in range(len(x))]) 
 		else:
 			return np.array([0 if y<-1 else x[i] for i in range(len(x))])
 	def J_func(self,X,y,theta):
-		return self.C*sum(self.cost_func(X[i],theta,y[i]) for i in range(len(X))) + np.vdot(theta,theta)
+		return self.C*sum(self.cost_func(X[i],theta,y[i]) for i in range(len(X))) + np.vdot(theta[1:],theta[1:])
 	def J_func_deriv_numerical(self,X,y,theta,epsilon=1e-10):
 		new_theta = np.copy(theta)
 		current_cost = self.J_func(X,y,theta)
@@ -207,7 +187,6 @@ class BinarySVM():
 			J_func_der[i] = (cost_plus - cost_minus)/(2*epsilon)
 		return J_func_der
 	def J_func_deriv(self,X,y,theta):
-		print()
 		return sum([(self._predict(X[i],theta) - y[i])*self.cost_func_deriv(X[i],theta,y[i]) for i in range(len(X))]) + theta
 	def export_model(self):
 		return self.theta
@@ -404,4 +383,4 @@ def linear_func_with_noise(x,k,b,epsilon):
 	k,b - line parameters
 	epsilon - range of noise
 	"""
-	return k*x+b+uniform(-epsilon,epsilon)
+	return k*x+np.random.normal(b,epsilon)
