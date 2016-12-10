@@ -4,6 +4,28 @@ from math import e, log, cos, sin, pi
 from functools import partial
 import re
 
+class FeatureConstructor():
+	def __init__(self,features,save_old_vals=True):
+		self.features = features
+		self.save_old_vals = save_old_vals
+	def __call__(self,X):
+		X = np.array(X)
+		if isinstance(self.features,list) or isinstance(self.features,tuple):
+			if len(X.shape)==2:
+				new_features = np.array([[feature(item) for feature in self.features] for item in X])
+			else:
+				new_features = np.array([feature(X) for feature in self.features])
+		elif callable(self.features):
+			new_features = np.array([self.features(item) for item in X])
+		else:
+			raise
+		if self.save_old_vals:
+			if len(X.shape)==len(new_features.shape)==1:
+				new_features = np.concatenate([X,new_features])
+			else:
+				new_features = np.column_stack([X,new_features])
+		return new_features
+
 class LinearRegression():
 	def __init__(self,alpha,n,normalize=True,Lambda=0.01,momentum=0.5):
 		self.theta = np.array([0 for i in range(n+1)])
@@ -76,7 +98,16 @@ class BinaryLogisticRegression():
 			self.theta = new_theta
 			self.cost_func_log.append(self.J_func(X,y,self.theta))
 	def _predict(self,x):
-		return self.sigmoid(np.vdot(self.theta,x))
+		try:
+			return self.sigmoid(np.vdot(self.theta,x))
+		except Exception:
+			print(x,self.theta)
+			raise
+		else:
+			pass
+		finally:
+			pass
+		
 	def predict(self,x):
 		x = np.array(x)
 		if self.normalize:

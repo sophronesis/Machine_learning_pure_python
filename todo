@@ -28,7 +28,8 @@ tolerance
 	Ссылки:
 		https://www.youtube.com/watch?v=RPtYRm2tboA
 [----] - 05 - Обобщенные линейные модели
-	??? просто добавить в исходные данные новых фич и запустить линейную регрессию?
+	Ссылки:
+		https://onlinecourses.science.psu.edu/stat504/node/216
 [++++] - 06 - Наивный баесовский классификатор
 	#set(set() for i in classes)
 	Ссылки:
