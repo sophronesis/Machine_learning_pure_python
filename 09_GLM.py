@@ -42,7 +42,7 @@ def main():
 		result = threshold(model2.predict(f(Xtest[i])))
 		confmat2[result][ytest[i]]+=1
 		confusion_dots2[result][ytest[i]].append(Xtest[i])
-	print('Basic features\nConfusion matrix:')
+	print('\nLearning 2 logistic regression models with and without additional handcrafted features\n\nBasic features\nConfusion matrix:')
 	print(confmat1)
 	accuracy = (confmat1[0][0]+confmat1[1][1])/np.sum(confmat1)
 	precision = confmat1[0][0]/(confmat1[0][0]+confmat1[1][0])

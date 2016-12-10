@@ -1,10 +1,5 @@
 Нейросеть
 SVM
-GDA
-Обобщ лин модели
-
-
-tolerance
 
 [++++] - 01 - Градиентный спуск (Применен в 02,03,09,11):
 	Done:
@@ -24,18 +19,17 @@ tolerance
 	Ссылки:
 		https://www.coursera.org/learn/machine-learning/lecture/wlPeP/classification
 	TODO: 
-[----] - 04 - Метод максимального правдоподобия
+[++++] - 04 - Метод максимального правдоподобия (Применен в 07)
 	Ссылки:
 		https://www.youtube.com/watch?v=RPtYRm2tboA
-[----] - 05 - Обобщенные линейные модели
+[++++] - 05 - Обобщенные линейные модели
 	Ссылки:
 		https://onlinecourses.science.psu.edu/stat504/node/216
 [++++] - 06 - Наивный баесовский классификатор
-	#set(set() for i in classes)
 	Ссылки:
 		https://alexn.org/blog/2012/02/09/howto-build-naive-bayes-classifier.html
 		http://nlp.stanford.edu/IR-book/html/htmledition/naive-bayes-text-classification-1.html
-[----] - 07 - Гаусовый дискриминантный анализ
+[++++] - 07 - Гаусовый дискриминантный анализ
 	Ссылки:
 		https://cosmolearning.org/video-lectures/learning-algorithms-generative-gaussian-discriminant-analysis-digression/
 		http://stats.stackexchange.com/questions/80507/what-is-a-gaussian-discriminant-analysis-gda

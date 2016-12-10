@@ -363,6 +363,29 @@ class ICA():
 		S = np.dot(W, X).T
 		return S
 
+class GDA(object):
+	def __init__(self):
+		pass	
+	def fit(self,X,y):
+		X0 = np.array([X[n] for n,i in enumerate(y) if i==0])
+		X1 = np.array([X[n] for n,i in enumerate(y) if i==1])
+		self.X0_mean,self.X1_mean = X0.mean(axis=0), X1.mean(axis=0)
+		getSigma = lambda X,mX:(lambda nX:nX.T.dot(nX))(X-mX)/X.shape[0]
+		self.X0_sigma,self.X1_sigma = getSigma(X0,self.X0_mean),getSigma(X1,self.X1_mean)
+	def predict_prob_0(self,x):
+		X0_prob = np.exp(-1/2*(x-self.X0_mean).T.dot(np.linalg.pinv(self.X0_sigma).dot(x-self.X0_mean)))/((2*pi)**(len(x)/2)*np.linalg.det(self.X0_sigma))
+		return X0_prob
+	def predict_prob_1(self,x):	
+		X1_prob = np.exp(-1/2*(x-self.X1_mean).T.dot(np.linalg.pinv(self.X1_sigma).dot(x-self.X1_mean)))/((2*pi)**(len(x)/2)*np.linalg.det(self.X1_sigma))	
+		return X1_prob
+	def predict_prob(self,x):
+		X0_prob,X1_prob = self.predict_prob_0(x),self.predict_prob_1(x)
+		return 1-X0_prob/(X0_prob+X1_prob) if X0_prob>X1_prob else X1_prob/(X0_prob+X1_prob)
+	def predict(self,x):
+		prob = self.predict_prob(x)
+		return 0 if prob<0.5 else 1
+
+
 def circle_cluster(center_x,center_y,rad):
 	"""Create sample from shape of a circle in coords (center_x,center_y) and with rad radius"""
 	rad,angle = rad*(1-triangular(0,1,0)),uniform(0,2*pi)
